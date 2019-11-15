@@ -53,10 +53,13 @@ class CPU:
             PUSH: self.handle_push,
             POP: self.handle_pop,
             CALL: self.handle_call,
-            RET: self.handle_ret
+            RET: self.handle_ret,
+            JMP: self.handle_jmp
         }
 
-    
+    def handle_jmp(self, a, b):
+        self.pc = self.register[a]
+
     def handle_hlt(self, a, b):
         self.halted = True
 
@@ -179,7 +182,7 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
+            self.fl,
             #self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
