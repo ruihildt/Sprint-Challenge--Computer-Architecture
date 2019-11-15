@@ -54,8 +54,22 @@ class CPU:
             POP: self.handle_pop,
             CALL: self.handle_call,
             RET: self.handle_ret,
-            JMP: self.handle_jmp
+            JMP: self.handle_jmp,
+            JNE: self.handle_jne,
+            JEQ: self.handle_jeq
         }
+
+    def handle_jeq(self, a, b):
+        if self.fl == 0b00000001:
+            self.pc = self.register[a]
+        else:
+            self.pc += 2
+
+    def handle_jne(self, a, b):
+        if self.fl != 0b00000001:
+            self.pc = self.register[a]
+        else:
+            self.pc += 2
 
     def handle_jmp(self, a, b):
         self.pc = self.register[a]
@@ -113,8 +127,8 @@ class CPU:
         """Load a program into memory."""
 
         if filename[-4:] != ".ls8":
-            full_filename = f"examples/{filename}.ls8"
-        else: full_filename = f"examples/{filename}"
+            full_filename = f"{filename}.ls8"
+        else: full_filename = f"{filename}"
         try:
             address = 0
             with open(full_filename) as f:
