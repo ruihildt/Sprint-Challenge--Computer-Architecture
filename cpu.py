@@ -11,6 +11,10 @@ PUSH = 0b01000101
 CALL = 0b01010000
 RET = 0b00010001
 ADD = 0b10100000
+CMP = 0b10100111
+JMP = 0b01010100
+JNE = 0b01010110
+JEQ = 0b01010101
 
 class CPU:
     """Main CPU class."""
@@ -32,6 +36,9 @@ class CPU:
 
         # Stack Pointer 
         self.sp = 7 # Stack pointer R7
+
+        # Flag register
+        self.fl = 0b00000000
         
         self.halted = False
 
@@ -41,6 +48,7 @@ class CPU:
             PRN: self.handle_prn,
             HLT: self.handle_hlt,
             ADD: self.handle_add,
+            CMP: self.handle_cmp,
             MUL: self.handle_mul,
             PUSH: self.handle_push,
             POP: self.handle_pop,
@@ -66,6 +74,10 @@ class CPU:
     
     def handle_add(self, a, b):
         self.alu("ADD", a, b)
+        self.pc += 3
+
+    def handle_cmp(self, a, b):
+        self.alu("CMP", a, b)
         self.pc += 3
 
     def handle_pop(self, a, b):
@@ -133,18 +145,6 @@ class CPU:
             print(f"{sys.argv[0]}: {sys.argv[1]} not found")
             sys.exit(2)
 
-        # For now, we've just hardcoded a program:
-
-        # program = [
-        #     # From print8.ls8
-        #     0b10000010, # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111, # PRN R0
-        #     0b00000000,
-        #     0b00000001, # HLT
-        # ]
-
     def ram_read(self, location):
         """Read avalue stored at specified address."""
         return self.ram[location]
@@ -160,6 +160,13 @@ class CPU:
             self.register[reg_a] += self.register[reg_b]
         elif op == "MUL":
             self.register[reg_a] *= self.register[reg_b]
+        elif op == "CMP":
+            if self.register[reg_a] < self.register[reg_b]:
+                self.fl = 0b00000100
+            elif self.register[reg_a] > self.register[reg_b]:
+                self.fl = 0b00000010
+            else:
+                self.fl = 0b00000001
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
